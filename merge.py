@@ -94,34 +94,6 @@ def merge_faster(*generators):
             left_generators -= 1
 
 
-class GeneratorWithValue:
-    def __init__(self, generator):
-        self.generator = generator
-        self.value = next(self.generator)
-
-    def __gt__(self, other):
-        return self.value > other.value
-
-
-def merge_faster_bisect(*generators):
-    import bisect
-
-    left_generators = len(generators)
-    generators_with_values = sorted([GeneratorWithValue(generator) for generator in generators], reverse=True)
-
-    while left_generators:
-        generator_with_value = generators_with_values.pop()
-
-        yield generator_with_value.value
-
-        try:
-            generator_with_value.value = next(generator_with_value.generator)
-        except StopIteration:
-            left_generators -= 1
-        else:
-            bisect.insort(generators_with_values, generator_with_value)
-
-
 if __name__ == '__main__':
     import random
 
@@ -131,7 +103,7 @@ if __name__ == '__main__':
         list_of_values = sorted([random.randint(random.randint(0, 300), 500) for _ in range(300)])
         generators.append(iter(list_of_values))
 
-    result = merge_faster_bisect(*generators)
+    result = merge_faster(*generators)
 
     print([x for x in result])
 
